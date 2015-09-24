@@ -1,0 +1,21 @@
+{
+  "name": "word_scramble",
+  "version": "1.0.0",
+  "description": "browser word game",
+  "main": "index.js",
+  "dependencies": {
+    "react": "^0.13.3",
+    "redux": "^3.0.0",
+    "npm": "^3.3.3",
+    "react-redux": "^2.1.2",
+    "redux-devtools": "^2.1.2"
+  },
+  "devDependencies": {
+    "babel": "^5.8.23"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
