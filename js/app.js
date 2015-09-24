@@ -1,15 +1,16 @@
-var React, jQuery, $, App
-React = require('react');
-jQuery = $ = require('jquery');
+var React = require('react');
+var $ = require('jquery')
 
 var app = app || {};
 
 (function () {
   // 'use strict';
+
   var WordScrambleApp = React.createClass({
     componentWillMount: function () {
       $.get(this.props.url, function(data) {
-        this.setState({ word: data.word });
+        var word = data.word.toLowerCase()
+        this.setState({ word: word, value: this.findValue(word)});
       }.bind(this))
 
       $.get('http://localhost:8080/words.txt', function(data) {
@@ -58,16 +59,46 @@ var app = app || {};
       var total = 0;
       word.split('').forEach(function(char) {
         total += this.state.points[char];
-      })
+      }.bind(this))
       return total;
     },
 
-    render: function () {
+    displayLetter: function(letter) {
       return (
-        <p>something</p>
+        <section className='letter-tiles'>
+          <Tile
+            letter={letter}
+          />
+        </section>
+      )
+    },
+
+    render: function () {
+      if (this.state.word) {
+        var letters = this.state.word.split('');
+      } else {
+        var letters = [''];
+      }
+      return (
+        <div>
+          <section>
+            {letters.map(this.displayLetter)}
+          </section>
+          <p>word: {this.state.word}</p>
+          <p>value: {this.state.value}</p>
+        </div>  
       )
     }
   });
+
+
+  var Tile = React.createClass({
+    render: function () {
+      return (
+        <div className='letter'>{this.props.letter}</div>
+      )
+    }
+  })
 
   var render = function () {
     React.render(

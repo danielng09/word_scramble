@@ -1,29 +1,30 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var React, jQuery, $, App;
+var React, jQuery, $, app, Tile;
 React = require('react');
 jQuery = $ = require('jquery');
 
-App = require('./js/app.js');
+app = require('./js/app.js');
 
 },{"./js/app.js":2,"jquery":3,"react":158}],2:[function(require,module,exports){
 'use strict';
 
-var React, jQuery, $, App;
-React = require('react');
-jQuery = $ = require('jquery');
+var React = require('react');
+var $ = require('jquery');
 
 var app = app || {};
 
 (function () {
   // 'use strict';
+
   var WordScrambleApp = React.createClass({
     displayName: 'WordScrambleApp',
 
     componentWillMount: function componentWillMount() {
       $.get(this.props.url, (function (data) {
-        this.setState({ word: data.word });
+        var word = data.word.toLowerCase();
+        this.setState({ word: word, value: this.findValue(word) });
       }).bind(this));
 
       $.get('http://localhost:8080/words.txt', (function (data) {
@@ -70,17 +71,60 @@ var app = app || {};
 
     findValue: function findValue(word) {
       var total = 0;
-      word.split('').forEach(function (char) {
+      word.split('').forEach((function (char) {
         total += this.state.points[char];
-      });
+      }).bind(this));
       return total;
     },
 
+    displayLetter: function displayLetter(letter) {
+      return React.createElement(
+        'section',
+        { className: 'letter-tiles' },
+        React.createElement(Tile, {
+          letter: letter
+        })
+      );
+    },
+
+    render: function render() {
+      if (this.state.word) {
+        var letters = this.state.word.split('');
+      } else {
+        var letters = [''];
+      }
+      return React.createElement(
+        'div',
+        null,
+        React.createElement(
+          'section',
+          null,
+          letters.map(this.displayLetter)
+        ),
+        React.createElement(
+          'p',
+          null,
+          'word: ',
+          this.state.word
+        ),
+        React.createElement(
+          'p',
+          null,
+          'value: ',
+          this.state.value
+        )
+      );
+    }
+  });
+
+  var Tile = React.createClass({
+    displayName: 'Tile',
+
     render: function render() {
       return React.createElement(
-        'p',
-        null,
-        'something'
+        'div',
+        { className: 'letter' },
+        this.props.letter
       );
     }
   });
@@ -89,7 +133,6 @@ var app = app || {};
     React.render(React.createElement(WordScrambleApp, {
       url: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=200000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=8&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
     }), document.getElementById('root'));
-    console.log('hello');
   };
 
   render();

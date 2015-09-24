@@ -1,5 +1,6 @@
-var React, jQuery, $, App
+var React, jQuery, $, app, Tile
 React = require('react');
 jQuery = $ = require('jquery');
 
-App = require('./js/app.js')
+
+app = require('./js/app.js')

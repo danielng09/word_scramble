@@ -1,0 +1,15 @@
+.letter {
+	font-size: 50px;
+	text-align: center;
+	box-shadow: 0 1px 3px #626262;
+    height: 80px;
+    line-height: 80px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    color: #35342D;
+    width: 80px;
+    display: inline-block;
+    background: #9E806D;
+    margin: 0 5px;
+    float: left;
+}
