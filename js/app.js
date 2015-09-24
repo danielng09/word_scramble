@@ -12,11 +12,15 @@ var app = app || {};
       this.getDictionaryLocally();
     },
 
+    componentDidMount: function() {
+      $(document.body).on('keydown', this.handleKeyDown);
+    },
+
     getWordFromWordNikAPI: function () {
       $.get(this.props.url, function(data) {
         var word = data.word.toLowerCase()
-        var scrambledWord = this.scrambleWord(word)
-        this.setState({ word: word, scrambledWord: scrambledWord })
+        var scrambledLetters = this.scrambleWordtoLetters(word)
+        this.setState({ word: word, wordLength: word.length, scrambledLetters: scrambledLetters })
       }.bind(this))
     },
 
@@ -30,8 +34,50 @@ var app = app || {};
       }.bind(this))
     },
 
+    handleKeyDown: function (event) {
+      var asciiValue = event.keyCode;
+      if (asciiValue == 13) {
+        this.checkGuess()
+      } else if (asciiValue >= 65 && asciiValue <= 90) {
+        var letter = String.fromCharCode(event.keyCode).toLowerCase();
+        this.guessNewLetter(letter)
+        if (this.state.guess.length == this.state.word.length) {
+          this.checkGuess()
+        }
+      }
+    },
+
+    guessNewLetter: function (letter) {
+      this.setState({ guess: this.state.guess + letter });
+      var scrambledLetters = this.state.scrambledLetters;
+      for (var idx = this.state.guessIdx; idx < this.state.wordLength; idx++) {
+        if (scrambledLetters[idx] === letter) {
+          var newLetter = scrambledLetters[idx]
+          var oldLetter = scrambledLetters[this.state.guessIdx]
+          scrambledLetters[this.state.guessIdx] = newLetter;
+          scrambledLetters[idx] = oldLetter;
+          break;
+        }
+      }
+
+      this.setState({ scrambledLetters: scrambledLetters, guessIdx: this.state.guessIdx + 1 })
+      
+      console.log(this.state.guess);
+    },
+
+    checkGuess: function () {
+      if (this.state.word == this.state.guess) {
+        console.log('correct guess')
+      } else {
+        console.log('wrong guess')
+      }
+      this.setState({ guess: '', guessIdx: 0 })
+    },
+
     getInitialState: function () {
       return ({
+        guess: '',
+        guessIdx: 0,
         points: {
             'e': 1,
             'a': 1,
@@ -72,7 +118,7 @@ var app = app || {};
       return total;
     },
 
-    scrambleWord: function(word) {
+    scrambleWordtoLetters: function(word) {
       var length = word.length;
       var randIndices = []
       var seen = {}
@@ -85,7 +131,7 @@ var app = app || {};
       }
       var output = randIndices.map(function(idx) {
         return word[idx];
-      }).join('')
+      })
 
       return output;
     },
@@ -102,7 +148,7 @@ var app = app || {};
 
     render: function () {
       if (this.state.word) {
-        var letters = this.state.scrambledWord.split('');
+        var letters = this.state.scrambledLetters;
         var value = this.findValue(this.state.word);
       } else {
         var letters = [''];
@@ -119,7 +165,6 @@ var app = app || {};
       )
     }
   });
-
 
   var Tile = React.createClass({
     render: function () {
