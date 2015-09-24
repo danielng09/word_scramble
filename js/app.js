@@ -8,17 +8,25 @@ var app = app || {};
 
   var WordScrambleApp = React.createClass({
     componentWillMount: function () {
+      this.getWordFromWordNikAPI();
+      this.getDictionaryLocally();
+    },
+
+    getWordFromWordNikAPI: function () {
       $.get(this.props.url, function(data) {
         var word = data.word.toLowerCase()
-        this.setState({ word: word, value: this.findValue(word)});
+        var scrambledWord = this.scrambleWord(word)
+        this.setState({ word: word, scrambledWord: scrambledWord })
       }.bind(this))
+    },
 
+    getDictionaryLocally: function () {
       $.get('http://localhost:8080/words.txt', function(data) {
         var dictionary = {};
         data.toLowerCase().split('\n').forEach(function(word) {
           dictionary[word] = true;
         });
-        this.setState({ dictionary: dictionary });
+        this.setState({ dictionary: dictionary})
       }.bind(this))
     },
 
@@ -51,7 +59,8 @@ var app = app || {};
             'x': 8,
             'q': 10,
             'z': 10
-        }
+        },
+        guess: ''
       })
     },
 
@@ -61,6 +70,24 @@ var app = app || {};
         total += this.state.points[char];
       }.bind(this))
       return total;
+    },
+
+    scrambleWord: function(word) {
+      var length = word.length;
+      var randIndices = []
+      var seen = {}
+      while (randIndices.length < length) {
+        var rand = Math.floor(Math.random() * length)
+        if (!seen[rand]) {
+          seen[rand] = true;
+          randIndices.push(rand)
+        }
+      }
+      var output = randIndices.map(function(idx) {
+        return word[idx];
+      }).join('')
+
+      return output;
     },
 
     displayLetter: function(letter) {
@@ -75,9 +102,11 @@ var app = app || {};
 
     render: function () {
       if (this.state.word) {
-        var letters = this.state.word.split('');
+        var letters = this.state.scrambledWord.split('');
+        var value = this.findValue(this.state.word);
       } else {
         var letters = [''];
+        var value = 0;
       }
       return (
         <div>
@@ -85,7 +114,7 @@ var app = app || {};
             {letters.map(this.displayLetter)}
           </section>
           <p>word: {this.state.word}</p>
-          <p>value: {this.state.value}</p>
+          <p>value: {value}</p>
         </div>  
       )
     }

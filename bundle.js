@@ -22,11 +22,19 @@ var app = app || {};
     displayName: 'WordScrambleApp',
 
     componentWillMount: function componentWillMount() {
+      this.getWordFromWordNikAPI();
+      this.getDictionaryLocally();
+    },
+
+    getWordFromWordNikAPI: function getWordFromWordNikAPI() {
       $.get(this.props.url, (function (data) {
         var word = data.word.toLowerCase();
-        this.setState({ word: word, value: this.findValue(word) });
+        var scrambledWord = this.scrambleWord(word);
+        this.setState({ word: word, scrambledWord: scrambledWord });
       }).bind(this));
+    },
 
+    getDictionaryLocally: function getDictionaryLocally() {
       $.get('http://localhost:8080/words.txt', (function (data) {
         var dictionary = {};
         data.toLowerCase().split('\n').forEach(function (word) {
@@ -65,7 +73,8 @@ var app = app || {};
           'x': 8,
           'q': 10,
           'z': 10
-        }
+        },
+        guess: ''
       };
     },
 
@@ -75,6 +84,24 @@ var app = app || {};
         total += this.state.points[char];
       }).bind(this));
       return total;
+    },
+
+    scrambleWord: function scrambleWord(word) {
+      var length = word.length;
+      var randIndices = [];
+      var seen = {};
+      while (randIndices.length < length) {
+        var rand = Math.floor(Math.random() * length);
+        if (!seen[rand]) {
+          seen[rand] = true;
+          randIndices.push(rand);
+        }
+      }
+      var output = randIndices.map(function (idx) {
+        return word[idx];
+      }).join('');
+
+      return output;
     },
 
     displayLetter: function displayLetter(letter) {
@@ -89,9 +116,11 @@ var app = app || {};
 
     render: function render() {
       if (this.state.word) {
-        var letters = this.state.word.split('');
+        var letters = this.state.scrambledWord.split('');
+        var value = this.findValue(this.state.word);
       } else {
         var letters = [''];
+        var value = 0;
       }
       return React.createElement(
         'div',
@@ -111,7 +140,7 @@ var app = app || {};
           'p',
           null,
           'value: ',
-          this.state.value
+          value
         )
       );
     }

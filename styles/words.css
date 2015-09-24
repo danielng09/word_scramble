@@ -1,7 +1,7 @@
 .letter {
 	font-size: 50px;
 	text-align: center;
-	box-shadow: 0 1px 3px #626262;
+	box-shadow: 0 1.5px 3px #626262;
     height: 80px;
     line-height: 80px;
     text-transform: uppercase;
@@ -9,7 +9,7 @@
     color: #35342D;
     width: 80px;
     display: inline-block;
-    background: #9E806D;
+    background: #F7C949;
     margin: 0 5px;
     float: left;
 }
