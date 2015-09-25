@@ -17,6 +17,7 @@ var app = app || {};
 
 (function () {
   // 'use strict';
+  var Tile = app.Tile;
 
   var WordScrambleApp = React.createClass({
     displayName: 'WordScrambleApp',
@@ -64,17 +65,19 @@ var app = app || {};
     guessNewLetter: function guessNewLetter(letter) {
       this.setState({ guess: this.state.guess + letter });
       var scrambledLetters = this.state.scrambledLetters;
+      var guessIdx = this.state.guessIdx;
       for (var idx = this.state.guessIdx; idx < this.state.wordLength; idx++) {
         if (scrambledLetters[idx] === letter) {
           var newLetter = scrambledLetters[idx];
           var oldLetter = scrambledLetters[this.state.guessIdx];
           scrambledLetters[this.state.guessIdx] = newLetter;
           scrambledLetters[idx] = oldLetter;
+          guessIdx += 1;
           break;
         }
       }
 
-      this.setState({ scrambledLetters: scrambledLetters, guessIdx: this.state.guessIdx + 1 });
+      this.setState({ scrambledLetters: scrambledLetters, guessIdx: guessIdx });
 
       console.log(this.state.guess);
     },
@@ -150,12 +153,17 @@ var app = app || {};
       return output;
     },
 
-    displayLetter: function displayLetter(letter) {
+    displayLetter: function displayLetter(letter, idx) {
+      var selected = false;
+      if (idx <= this.state.guess.length - 1) {
+        selected = true;
+      }
       return React.createElement(
         'section',
         { className: 'letter-tiles' },
         React.createElement(Tile, {
-          letter: letter
+          letter: letter,
+          selected: selected
         })
       );
     },
@@ -196,9 +204,13 @@ var app = app || {};
     displayName: 'Tile',
 
     render: function render() {
+      var style = 'letter';
+      if (this.props.selected) {
+        style += ' selected';
+      }
       return React.createElement(
         'div',
-        { className: 'letter' },
+        { className: style },
         this.props.letter
       );
     }
