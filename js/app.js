@@ -19,7 +19,7 @@ var app = app || {};
 
     getWordFromWordNikAPI: function () {
       $.get(this.props.url, function(data) {
-        var word = data.word.toLowerCase()
+        var word = data.word.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
         var scrambledLetters = this.scrambleWordtoLetters(word)
         this.setState({ word: word, wordLength: word.length, scrambledLetters: scrambledLetters })
       }.bind(this))
@@ -54,8 +54,8 @@ var app = app || {};
       var guessIdx = this.state.guessIdx;
       for (var idx = this.state.guessIdx; idx < this.state.wordLength; idx++) {
         if (scrambledLetters[idx] === letter) {
-          var newLetter = scrambledLetters[idx]
-          var oldLetter = scrambledLetters[this.state.guessIdx]
+          var newLetter = scrambledLetters[idx];
+          var oldLetter = scrambledLetters[this.state.guessIdx];
           scrambledLetters[this.state.guessIdx] = newLetter;
           scrambledLetters[idx] = oldLetter;
           guessIdx += 1;
@@ -70,6 +70,9 @@ var app = app || {};
 
     checkGuess: function () {
       if (this.state.word == this.state.guess) {
+        this.getWordFromWordNikAPI();
+        var value = this.findValue(this.state.word);
+        this.setState({ points: this.state.points + value })
         console.log('correct guess')
       } else {
         console.log('wrong guess')
@@ -81,33 +84,34 @@ var app = app || {};
       return ({
         guess: '',
         guessIdx: 0,
-        points: {
-            'e': 1,
-            'a': 1,
-            'i': 1,
-            'o': 1,
-            "n": 1,
-            'r': 1,
-            't': 1,
-            'l': 1,
-            's': 1,
-            'u': 1,
-            'd': 2,
-            'g': 2,
-            'b': 3,
-            'c': 3,
-            'm': 3,
-            'p': 3,
-            'f': 4,
-            'h': 4,
-            'v': 4,
-            'w': 4,
-            'y': 4,
-            'k': 5,
-            'j': 8,
-            'x': 8,
-            'q': 10,
-            'z': 10
+        points: 0,
+        pointValues: {
+            'e': 10,
+            'a': 10,
+            'i': 10,
+            'o': 10,
+            "n": 10,
+            'r': 10,
+            't': 10,
+            'l': 10,
+            's': 10,
+            'u': 10,
+            'd': 20,
+            'g': 20,
+            'b': 30,
+            'c': 30,
+            'm': 30,
+            'p': 30,
+            'f': 40,
+            'h': 40,
+            'v': 40,
+            'w': 40,
+            'y': 40,
+            'k': 50,
+            'j': 80,
+            'x': 80,
+            'q': 100,
+            'z': 100
         },
         guess: ''
       })
@@ -116,7 +120,7 @@ var app = app || {};
     findValue: function(word) {
       var total = 0;
       word.split('').forEach(function(char) {
-        total += this.state.points[char];
+        total += this.state.pointValues[char];
       }.bind(this))
       return total;
     },
@@ -169,6 +173,11 @@ var app = app || {};
           </section>
           <p>word: {this.state.word}</p>
           <p>value: {value}</p>
+          <section>
+            <Footer
+              points={this.state.points}
+            />
+          </section>
         </div>  
       )
     }
@@ -186,10 +195,24 @@ var app = app || {};
     }
   })
 
+  var Footer = React.createClass({
+    getInitialState: function () {
+      return ({
+        time: 60,
+      })
+    },
+
+    render: function () {
+      return (
+        <span>Time: {this.state.time}s | Points: {this.props.points}</span>
+      )
+    },
+  })
+
   var render = function () {
     React.render(
       <WordScrambleApp
-        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=200000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=8&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
+        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=8&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
       />,
       document.getElementById('root')
     );
