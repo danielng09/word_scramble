@@ -248,8 +248,20 @@ var app = app || {};
 
     getInitialState: function getInitialState() {
       return {
-        time: 60
+        timeLeft: 60
       };
+    },
+
+    tick: function tick() {
+      this.setState({ timeLeft: this.state.timeLeft - 1 });
+      if (this.state.timeLeft <= 0) {
+        clearInterval(this.interval);
+        this.handleOutofTime;
+      }
+    },
+
+    componentDidMount: function componentDidMount() {
+      this.interval = setInterval(this.tick, 1000);
     },
 
     render: function render() {
@@ -257,7 +269,7 @@ var app = app || {};
         'span',
         null,
         'Time: ',
-        this.state.time,
+        this.state.timeLeft,
         's | Points: ',
         this.props.points
       );

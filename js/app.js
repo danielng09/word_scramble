@@ -170,6 +170,10 @@ var app = app || {};
       return output;
     },
 
+    handleOutofTime: function () {
+      
+    },
+
     displayLetter: function(letter, idx) {
       var selected = false;
       if (idx < this.state.guessedLetters.length) {
@@ -200,6 +204,7 @@ var app = app || {};
           <section>
             <Footer
               points={this.state.points}
+              handleOutofTime={this.handleOutofTime}
             />
           </section>
         </div>
@@ -222,13 +227,29 @@ var app = app || {};
   var Footer = React.createClass({
     getInitialState: function () {
       return ({
-        time: 60,
+        timeLeft: 60
       })
+    },
+
+    tick: function () {
+      this.setState({ timeLeft: this.state.timeLeft - 1});
+      if (this.state.timeLeft <= 0) {
+        clearInterval(this.interval)
+        this.props.handleOutofTime()
+      }
+    },
+
+    componentDidMount: function () {
+      this.interval = setInterval(this.tick, 1000);
+    },
+
+    componentWillUnmount: function () {
+      clearInterval(this.interval)
     },
 
     render: function () {
       return (
-        <span>Time: {this.state.time}s | Points: {this.props.points}</span>
+        <span>Time: {this.state.timeLeft}s | Points: {this.props.points}</span>
       )
     },
   })
