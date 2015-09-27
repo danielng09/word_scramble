@@ -1,17 +1,19 @@
 body {
-    background-color: #ECECC6
+    background-color: #ECECC6;
+    font-family: 'Lato', sans-serif;
 }
 
 .letter {
-	font-size: 50px;
+    font-weight: bold;
+	font-size: 60px;
 	text-align: center;
 	box-shadow: 0 1.5px 3px #626262;
-    height: 80px;
-    line-height: 80px;
+    height: 85px;
+    line-height: 85px;
     text-transform: uppercase;
     border-radius: 4px;
     color: #35342D;
-    width: 80px;
+    width: 85px;
     display: inline-block;
     background: #F7C949;
     margin: 0 5px;
@@ -19,6 +21,5 @@ body {
 }
 
 .selected {
-    /*border: 1px solid rgba(224, 145, 0, 4);*/
     background-color: rgb(224, 145, 0);
 }
