@@ -8,82 +8,11 @@ var app = app || {};
   var Tile = app.Tile
 
   var WordScrambleApp = React.createClass({
-    componentWillMount: function () {
-      this.getWordFromWordNikAPI();
-      this.getDictionaryLocally();
-    },
 
-    componentDidMount: function() {
-      $(document.body).on('keydown', this.handleKeyDown);
-    },
-
-    getWordFromWordNikAPI: function () {
-      $.get(this.props.url, function(data) {
-        var word = data.word.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
-        var scrambledLetters = this.scrambleWordtoLetters(word)
-        this.setState({ word: word, wordLength: word.length, scrambledLetters: scrambledLetters })
-      }.bind(this))
-    },
-
-    getDictionaryLocally: function () {
-      $.get('http://localhost:8080/words.txt', function(data) {
-        var dictionary = {};
-        data.toLowerCase().split('\n').forEach(function(word) {
-          dictionary[word] = true;
-        });
-        this.setState({ dictionary: dictionary})
-      }.bind(this))
-    },
-
-    handleKeyDown: function (event) {
-      var asciiValue = event.keyCode;
-      if (asciiValue == 13) {
-        this.checkGuess()
-      } else if (asciiValue >= 65 && asciiValue <= 90) {
-        var letter = String.fromCharCode(event.keyCode).toLowerCase();
-        this.guessNewLetter(letter)
-        if (this.state.guess.length == this.state.word.length) {
-          this.checkGuess()
-        }
-      }
-    },
-
-    guessNewLetter: function (letter) {
-      this.setState({ guess: this.state.guess + letter });
-      var scrambledLetters = this.state.scrambledLetters;
-      var guessIdx = this.state.guessIdx;
-      for (var idx = this.state.guessIdx; idx < this.state.wordLength; idx++) {
-        if (scrambledLetters[idx] === letter) {
-          var newLetter = scrambledLetters[idx];
-          var oldLetter = scrambledLetters[this.state.guessIdx];
-          scrambledLetters[this.state.guessIdx] = newLetter;
-          scrambledLetters[idx] = oldLetter;
-          guessIdx += 1;
-          break;
-        }
-      }
-
-      this.setState({ scrambledLetters: scrambledLetters, guessIdx: guessIdx })
-      
-      console.log(this.state.guess);
-    },
-
-    checkGuess: function () {
-      if (this.state.word == this.state.guess) {
-        this.getWordFromWordNikAPI();
-        var value = this.findValue(this.state.word);
-        this.setState({ points: this.state.points + value })
-        console.log('correct guess')
-      } else {
-        console.log('wrong guess')
-      }
-      this.setState({ guess: '', guessIdx: 0 })
-    },
-
-    getInitialState: function () {
+   getInitialState: function () {
       return ({
-        guess: '',
-        guessIdx: 0,
+        availableLetters: [],
+        guessedLetters: [],
         points: 0,
         pointValues: {
             'e': 10,
@@ -112,9 +41,107 @@ var app = app || {};
             'x': 80,
             'q': 100,
             'z': 100
-        },
-        guess: ''
+        }
       })
+    },
+
+    componentWillMount: function () {
+      this.getWordFromWordNikAPI();
+      this.getDictionaryLocally();
+    },
+
+    componentDidMount: function () {
+      $(document.body).on('keydown', this.handleKeyDown);
+    },
+
+    componentDidUpdate: function () {
+      if (this.state.word && 
+          this.state.guessedLetters.length === this.state.word.length) {
+        this.checkGuess() 
+      } 
+    },
+
+    getWordFromWordNikAPI: function () {
+      $.get(this.props.url, function(data) {
+        var word = data.word.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
+        var scrambledLetters = this.scrambleWordtoLetters(word)
+        this.setState({ word: word, 
+                        scrambledLetters: scrambledLetters, 
+                        availableLetters: scrambledLetters
+                      })
+      }.bind(this))
+    },
+
+    getDictionaryLocally: function () {
+      $.get('http://localhost:8080/words.txt', function(data) {
+        var dictionary = {};
+        data.toLowerCase().split('\n').forEach(function(word) {
+          dictionary[word] = true;
+        });
+        this.setState({ dictionary: dictionary})
+      }.bind(this))
+    },
+
+    handleKeyDown: function (event) {
+      event.preventDefault();
+      var asciiValue = event.keyCode;
+      if (asciiValue === 8) {
+        this.removeGuessedLetter();
+      } else if (asciiValue === 13) {
+        this.checkGuess()
+      } else if (asciiValue >= 65 && asciiValue <= 90) {
+        var letter = String.fromCharCode(event.keyCode).toLowerCase();
+        this.guessNewLetter(letter)
+      }
+    },
+
+    removeGuessedLetter: function () {
+      if (this.state.guessedLetters.length > 0) {
+        var removedLetter = this.state.guessedLetters.splice(-1, 1)[0];
+        this.state.availableLetters.push(removedLetter)
+        this.setState({ guessedLetters: this.state.guessedLetters,
+                        availableLetters: this.state.availableLetters,
+                      })
+      }
+    },
+
+    guessNewLetter: function (letter) {
+      var matchedGuessIdx = this.hasElementInArray(this.state.availableLetters, letter)
+      if (typeof matchedGuessIdx === 'number') {
+        var guessedLetter = this.state.availableLetters.splice(matchedGuessIdx, 1)[0];
+        this.state.guessedLetters.push(guessedLetter)
+        this.setState({
+          guessedLetters: this.state.guessedLetters,
+          availableLetters: this.state.availableLetters
+
+        })
+      }
+
+      console.log(this.state.guessedLetters.join(''));
+    },
+
+    hasElementInArray: function (array, ele) {
+      for (var idx = 0; idx < array.length; idx++) {
+        if (array[idx] === ele ) {
+          return idx;
+        }
+      }
+      return false;
+    },
+
+    checkGuess: function () {
+      if (this.state.word === this.state.guessedLetters.join('')) {
+        window.setTimeout(function () {
+          var value = this.findValue(this.state.word);
+          this.setState({ points: this.state.points + value, guessedLetters: [] })
+          this.getWordFromWordNikAPI();
+          console.log('correct guess')
+        }.bind(this), 1000)
+      } else {
+        var scrambledLetters = this.scrambleWordtoLetters(this.state.word);
+        this.setState({ availableLetters: scrambledLetters, guessedLetters: [] })
+        console.log('wrong guess')
+      }
     },
 
     findValue: function(word) {
@@ -145,7 +172,7 @@ var app = app || {};
 
     displayLetter: function(letter, idx) {
       var selected = false;
-      if (idx <= this.state.guess.length - 1) {
+      if (idx < this.state.guessedLetters.length) {
         selected = true;
       }
       return (
@@ -159,26 +186,23 @@ var app = app || {};
     },
 
     render: function () {
-      if (this.state.word) {
-        var letters = this.state.scrambledLetters;
-        var value = this.findValue(this.state.word);
-      } else {
-        var letters = [''];
-        var value = 0;
-      }
+      var letters = this.state.guessedLetters.concat(this.state.availableLetters)
+
+      console.log(this.state.word)
       return (
         <div>
           <section>
             {letters.map(this.displayLetter)}
           </section>
-          <p>word: {this.state.word}</p>
-          <p>value: {value}</p>
+          <br /><br /><br /><br />
+          <p /><p />
+          <br />
           <section>
             <Footer
               points={this.state.points}
             />
           </section>
-        </div>  
+        </div>
       )
     }
   });
@@ -212,7 +236,7 @@ var app = app || {};
   var render = function () {
     React.render(
       <WordScrambleApp
-        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=8&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
+        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
       />,
       document.getElementById('root')
     );
