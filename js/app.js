@@ -41,7 +41,7 @@ var app = app || {};
             'x': 80,
             'q': 100,
             'z': 100
-        }
+        },
       })
     },
 
@@ -170,8 +170,11 @@ var app = app || {};
       return output;
     },
 
-    handleOutofTime: function () {
-      
+    handleOutOfTime: function () {
+      React.render(<ScoreModal 
+                    points={this.state.points}/>, 
+                    document.getElementById('gameOver'));
+      $(document.body).off();
     },
 
     displayLetter: function(letter, idx) {
@@ -195,16 +198,18 @@ var app = app || {};
       console.log(this.state.word)
       return (
         <div>
-          <section>
+          <div id='end-game'>
+          </div>
+          <div class='tiles'>
             {letters.map(this.displayLetter)}
-          </section>
+          </div>
           <br /><br /><br /><br />
           <p /><p />
           <br />
           <section>
             <Footer
               points={this.state.points}
-              handleOutofTime={this.handleOutofTime}
+              handleOutOfTime={this.handleOutOfTime}
             />
           </section>
         </div>
@@ -227,20 +232,24 @@ var app = app || {};
   var Footer = React.createClass({
     getInitialState: function () {
       return ({
-        timeLeft: 60
+        timeLeft: 1
       })
+    },
+
+    startTimer: function () {
+      this.interval = setInterval(this.tick, 1000);
     },
 
     tick: function () {
       this.setState({ timeLeft: this.state.timeLeft - 1});
       if (this.state.timeLeft <= 0) {
         clearInterval(this.interval)
-        this.props.handleOutofTime()
+        this.props.handleOutOfTime()
       }
     },
 
     componentDidMount: function () {
-      this.interval = setInterval(this.tick, 1000);
+      this.startTimer();
     },
 
     componentWillUnmount: function () {
@@ -254,11 +263,37 @@ var app = app || {};
     },
   })
 
+  var ScoreModal = React.createClass({
+    render: function () {
+      return (
+        <div>
+          <div className='overlay'></div>
+          <div className='score-modal clearfix'>
+            <h3>Game Over!</h3>
+            <p>You got {this.props.points} points</p>
+            <button id='play-again' onClick={this.playAgain}>Play Again!</button>
+            <div className='high-score'>
+            </div>
+          </div>
+        </div>
+      )
+    },
+
+    playAgain: function () {
+      React.unmountComponentAtNode(document.getElementById('gameOver'))
+      React.unmountComponentAtNode(document.getElementById('root'))
+      React.render(
+        <WordScrambleApp
+          url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5' />,
+        document.getElementById('root')
+      );
+    }
+  })
+
   var render = function () {
     React.render(
       <WordScrambleApp
-        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
-      />,
+        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5' />,
       document.getElementById('root')
     );
   };

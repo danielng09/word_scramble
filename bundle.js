@@ -182,6 +182,12 @@ var app = app || {};
       return output;
     },
 
+    handleOutOfTime: function handleOutOfTime() {
+      React.render(React.createElement(ScoreModal, {
+        points: this.state.points }), document.getElementById('gameOver'));
+      $(document.body).off();
+    },
+
     displayLetter: function displayLetter(letter, idx) {
       var selected = false;
       if (idx < this.state.guessedLetters.length) {
@@ -204,9 +210,10 @@ var app = app || {};
       return React.createElement(
         'div',
         null,
+        React.createElement('div', { id: 'end-game' }),
         React.createElement(
-          'section',
-          null,
+          'div',
+          { 'class': 'tiles' },
           letters.map(this.displayLetter)
         ),
         React.createElement('br', null),
@@ -220,7 +227,8 @@ var app = app || {};
           'section',
           null,
           React.createElement(Footer, {
-            points: this.state.points
+            points: this.state.points,
+            handleOutOfTime: this.handleOutOfTime
           })
         )
       );
@@ -248,20 +256,28 @@ var app = app || {};
 
     getInitialState: function getInitialState() {
       return {
-        timeLeft: 60
+        timeLeft: 1
       };
+    },
+
+    startTimer: function startTimer() {
+      this.interval = setInterval(this.tick, 1000);
     },
 
     tick: function tick() {
       this.setState({ timeLeft: this.state.timeLeft - 1 });
       if (this.state.timeLeft <= 0) {
         clearInterval(this.interval);
-        this.handleOutofTime;
+        this.props.handleOutOfTime();
       }
     },
 
     componentDidMount: function componentDidMount() {
-      this.interval = setInterval(this.tick, 1000);
+      this.startTimer();
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+      clearInterval(this.interval);
     },
 
     render: function render() {
@@ -276,10 +292,50 @@ var app = app || {};
     }
   });
 
+  var ScoreModal = React.createClass({
+    displayName: 'ScoreModal',
+
+    render: function render() {
+      return React.createElement(
+        'div',
+        null,
+        React.createElement('div', { className: 'overlay' }),
+        React.createElement(
+          'div',
+          { className: 'score-modal clearfix' },
+          React.createElement(
+            'h3',
+            null,
+            'Game Over!'
+          ),
+          React.createElement(
+            'p',
+            null,
+            'You got ',
+            this.props.points,
+            ' points'
+          ),
+          React.createElement(
+            'button',
+            { id: 'play-again', onClick: this.playAgain },
+            'Play Again!'
+          ),
+          React.createElement('div', { className: 'high-score' })
+        )
+      );
+    },
+
+    playAgain: function playAgain() {
+      React.unmountComponentAtNode(document.getElementById('gameOver'));
+      React.unmountComponentAtNode(document.getElementById('root'));
+      React.render(React.createElement(WordScrambleApp, {
+        url: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5' }), document.getElementById('root'));
+    }
+  });
+
   var render = function render() {
     React.render(React.createElement(WordScrambleApp, {
-      url: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
-    }), document.getElementById('root'));
+      url: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5' }), document.getElementById('root'));
   };
 
   render();

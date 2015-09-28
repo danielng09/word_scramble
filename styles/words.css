@@ -1,6 +1,10 @@
 body {
-    background-color: #ECECC6;
+    background-color: #EAD2AC;
     font-family: 'Lato', sans-serif;
+}
+
+.tiles {
+    text-align: center;
 }
 
 .letter {
@@ -15,11 +19,57 @@ body {
     color: #35342D;
     width: 85px;
     display: inline-block;
-    background: #F7C949;
+    background: #F5BB00;
     margin: 0 5px;
     float: left;
 }
 
 .selected {
-    background-color: rgb(224, 145, 0);
+    background-color: #EC9F05;
+}
+
+.overlay {
+    position: fixed;
+    background-color: rgba(170,169,176,0.7);
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 75;
+}
+
+.score-modal {
+    border-radius: 4px;
+    left: 50%;
+    top: 20%;
+    text-align: center;
+    margin-left: -230px;
+    padding: 60px 0;
+    width: 460px;
+    background: #FFF;
+    position: absolute;
+    box-shadow: 0 1.5px 3px #626262;
+    z-index: 100;
+}
+
+#play-again {
+    color: #403E35;
+    border: none;
+    background: #5cb85c;
+    padding: 20px 60px;
+    border-radius: 4px;
+    transition: 0.3s all;
+    margin-top: 30px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 1.5px 3px #626262;
+}
+
+#play-again:hover {
+    background: #8FC18F;
+}
+
+.clearfix {
+  overflow: auto;
 }
