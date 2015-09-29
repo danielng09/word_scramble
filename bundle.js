@@ -332,7 +332,7 @@ module.exports = React.createClass({
         React.createElement('br', null),
         React.createElement(
           'a',
-          { id: 'play-again', href: '/' },
+          { id: 'play-again', href: '/word_scramble' },
           'Play Again!'
         ),
         React.createElement('div', { className: 'high-score' })
