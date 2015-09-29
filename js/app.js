@@ -1,19 +1,18 @@
+'use strict';
+
 var React = require('react');
-var $ = require('jquery')
+var $ = require('jquery');
+var Tile = require('./tile.js');
+var Footer = require('./footer.js');
+var ScoreModal = require('./scoreModal.js');
 
-var app = app || {};
-
-(function () {
-  // 'use strict';
-  var Tile = app.Tile
-
-  var WordScrambleApp = React.createClass({
-
+module.exports = React.createClass({
    getInitialState: function () {
       return ({
         availableLetters: [],
         guessedLetters: [],
         points: 0,
+        wordsGuessed: 0,
         pointValues: {
             'e': 10,
             'a': 10,
@@ -133,10 +132,12 @@ var app = app || {};
       if (this.state.word === this.state.guessedLetters.join('')) {
         window.setTimeout(function () {
           var value = this.findValue(this.state.word);
-          this.setState({ points: this.state.points + value, guessedLetters: [] })
+          this.setState({ points: this.state.points + value, 
+                          guessedLetters: [],
+                          wordsGuessed: this.state.wordsGuessed + 1 })
           this.getWordFromWordNikAPI();
           console.log('correct guess')
-        }.bind(this), 1000)
+        }.bind(this), 500)
       } else {
         var scrambledLetters = this.scrambleWordtoLetters(this.state.word);
         this.setState({ availableLetters: scrambledLetters, guessedLetters: [] })
@@ -172,7 +173,9 @@ var app = app || {};
 
     handleOutOfTime: function () {
       React.render(<ScoreModal 
-                    points={this.state.points}/>, 
+                    points={this.state.points}
+                    wordsGuessed={this.state.wordsGuessed} 
+                    word={this.state.word} />,
                     document.getElementById('gameOver'));
       $(document.body).off();
     },
@@ -183,12 +186,9 @@ var app = app || {};
         selected = true;
       }
       return (
-        <section className='letter-tiles'>
           <Tile
             letter={letter}
-            selected={selected}
-          />
-        </section>
+            selected={selected} />
       )
     },
 
@@ -216,87 +216,3 @@ var app = app || {};
       )
     }
   });
-
-  var Tile = React.createClass({
-    render: function () {
-      var style = 'letter'
-      if (this.props.selected) {
-        style += ' selected'
-      }
-      return (
-        <div className={style}>{this.props.letter}</div>
-      )
-    }
-  })
-
-  var Footer = React.createClass({
-    getInitialState: function () {
-      return ({
-        timeLeft: 1
-      })
-    },
-
-    startTimer: function () {
-      this.interval = setInterval(this.tick, 1000);
-    },
-
-    tick: function () {
-      this.setState({ timeLeft: this.state.timeLeft - 1});
-      if (this.state.timeLeft <= 0) {
-        clearInterval(this.interval)
-        this.props.handleOutOfTime()
-      }
-    },
-
-    componentDidMount: function () {
-      this.startTimer();
-    },
-
-    componentWillUnmount: function () {
-      clearInterval(this.interval)
-    },
-
-    render: function () {
-      return (
-        <span>Time: {this.state.timeLeft}s | Points: {this.props.points}</span>
-      )
-    },
-  })
-
-  var ScoreModal = React.createClass({
-    render: function () {
-      return (
-        <div>
-          <div className='overlay'></div>
-          <div className='score-modal clearfix'>
-            <h3>Game Over!</h3>
-            <p>You got {this.props.points} points</p>
-            <button id='play-again' onClick={this.playAgain}>Play Again!</button>
-            <div className='high-score'>
-            </div>
-          </div>
-        </div>
-      )
-    },
-
-    playAgain: function () {
-      React.unmountComponentAtNode(document.getElementById('gameOver'))
-      React.unmountComponentAtNode(document.getElementById('root'))
-      React.render(
-        <WordScrambleApp
-          url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5' />,
-        document.getElementById('root')
-      );
-    }
-  })
-
-  var render = function () {
-    React.render(
-      <WordScrambleApp
-        url='http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=400000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5' />,
-      document.getElementById('root')
-    );
-  };
-
-  render()
-})()

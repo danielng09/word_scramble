@@ -1,16 +1,15 @@
-var app = app || {};
+'use strict';
+
 var React = require('react');
 
-(function () {
-	'use strict';
-
-	app.Tile = React.createClass({
-		render: function () {
-			return (
-				<button>{this.props.letter}</button>
-			)
-		}
-	})
-})();
-
-module.exports = app.Tile;
+module.exports = React.createClass({
+	render: function () {
+     	var style = 'letter'
+    	if (this.props.selected) {
+        	style += ' selected'
+      	}
+     	return (
+        	<div className={style}>{this.props.letter}</div>
+      	)
+    }
+ })

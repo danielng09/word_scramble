@@ -3,25 +3,29 @@ body {
     font-family: 'Lato', sans-serif;
 }
 
+#root {
+    text-align: center;
+    margin-top: 10%;
+}
+
 .tiles {
     text-align: center;
 }
 
 .letter {
+    display: inline-block;
     font-weight: bold;
-	font-size: 60px;
-	text-align: center;
-	box-shadow: 0 1.5px 3px #626262;
+    font-size: 60px;
+    text-align: center;
+    box-shadow: 0 1.5px 3px #626262;
     height: 85px;
     line-height: 85px;
     text-transform: uppercase;
     border-radius: 4px;
     color: #35342D;
     width: 85px;
-    display: inline-block;
     background: #F5BB00;
     margin: 0 5px;
-    float: left;
 }
 
 .selected {
@@ -44,19 +48,20 @@ body {
     top: 20%;
     text-align: center;
     margin-left: -230px;
-    padding: 60px 0;
+    padding: 40px 0px 50px 0px;
     width: 460px;
-    background: #FFF;
+    background: aliceblue;
     position: absolute;
     box-shadow: 0 1.5px 3px #626262;
     z-index: 100;
 }
 
 #play-again {
+    text-decoration: none;
     color: #403E35;
     border: none;
     background: #5cb85c;
-    padding: 20px 60px;
+    padding: 10px 40px;
     border-radius: 4px;
     transition: 0.3s all;
     margin-top: 30px;
@@ -71,5 +76,10 @@ body {
 }
 
 .clearfix {
-  overflow: auto;
+    overflow: auto;
 }
+
+.footer {
+    font-size: 25px;
+}
+
