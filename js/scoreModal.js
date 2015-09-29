@@ -13,7 +13,7 @@ module.exports = React.createClass({
           <p>You guessed <b>{this.props.wordsGuessed} words</b> for <b>{this.props.points} points</b></p>
           <p>The word was <b>{this.props.word}</b></p>
           <br /><br />
-          <a id='play-again' href='/'>Play Again!</a>
+          <a id='play-again' href='/word_scramble'>Play Again!</a>
           <div className='high-score'>
           </div>
         </div>
