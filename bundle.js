@@ -242,7 +242,7 @@ module.exports = React.createClass({
 
   getInitialState: function getInitialState() {
     return {
-      timeLeft: 2
+      timeLeft: 60
     };
   },
 
