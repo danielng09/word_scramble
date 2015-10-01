@@ -5,7 +5,7 @@ var React = require('react');
 module.exports = React.createClass({
   getInitialState: function () {
     return ({
-      timeLeft: 60
+      timeLeft: 2
     })
   },
 

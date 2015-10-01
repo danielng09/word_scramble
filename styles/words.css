@@ -48,7 +48,7 @@ body {
     top: 20%;
     text-align: center;
     margin-left: -230px;
-    padding: 40px 0px 50px 0px;
+    padding: 20px 0px 20px 0px;
     width: 460px;
     background: aliceblue;
     position: absolute;
@@ -81,5 +81,15 @@ body {
 
 .footer {
     font-size: 25px;
+}
+
+.leaderboard {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.leaderboard caption {
+    font-size: 25px;
+    margin-bottom: 10px;
 }
 
