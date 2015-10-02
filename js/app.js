@@ -26,7 +26,7 @@ module.exports = React.createClass({
   },
 
   componentDidMount: function () {
-    $(document.body).on('keydown', this.handleKeyDown);
+    document.body.addEventListener('keydown', this.handleKeyDown);
   },
 
   componentDidUpdate: function () {
@@ -141,7 +141,7 @@ module.exports = React.createClass({
                   wordsGuessed={this.state.wordsGuessed} 
                   word={this.state.word} />,
                   document.getElementById('gameOver'));
-    $(document.body).off();
+    document.body.removeEventListener('keydown', this.handleKeyDown)
   },
 
   displayLetter: function(letter, idx) {

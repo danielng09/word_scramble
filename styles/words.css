@@ -45,7 +45,7 @@ body {
 .score-modal {
     border-radius: 4px;
     left: 50%;
-    top: 20%;
+    top: 10%;
     text-align: center;
     margin-left: -230px;
     padding: 20px 0px 20px 0px;
@@ -67,7 +67,7 @@ body {
     margin-top: 30px;
     font-weight: 800;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 18px;
     box-shadow: 0 1.5px 3px #626262;
 }
 
