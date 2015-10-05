@@ -11,12 +11,11 @@ React.render(React.createElement(WordScrambleApp, null), document.getElementById
 
 var React = require('react');
 
-var $ = require('jquery');
+var $l = require('./jquery_lite.js');
 var Tile = require('./tile.js');
 var Footer = require('./footer.js');
 var ScoreModal = require('./scoreModal.js');
-window.Utils = require('./utils.js');
-var $l = require('./jquery_lite.js');
+var Utils = require('./utils.js');
 
 module.exports = React.createClass({
   displayName: 'exports',
@@ -46,28 +45,16 @@ module.exports = React.createClass({
   },
 
   getWordFromWordNikAPI: function getWordFromWordNikAPI() {
-    // var options = {
-    //   url: "http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=500000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=7&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5",
-    //   success: function(data) {
-    //     var word = data.word.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
-    //     var scrambledLetters = this.scrambleWordtoLetters(word)
-    //     this.setState({ word: word,
-    //                     scrambledLetters: scrambledLetters,
-    //                     availableLetters: scrambledLetters
-    //                   })
-    //   }.bind(this)
-    // };
-
-    // $l.ajax(options)
-
-    $.get(Utils.WORDNIKURL, (function (response) {
-      var word = response.word.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
+    var successCallback = (function (response) {
+      var word = JSON.parse(response).word.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
       var scrambledLetters = this.scrambleWordtoLetters(word);
       this.setState({ word: word,
         scrambledLetters: scrambledLetters,
         availableLetters: scrambledLetters
       });
-    }).bind(this));
+    }).bind(this);
+
+    $l.ajax({ url: Utils.WORDNIKURL, success: successCallback });
   },
 
   handleKeyDown: function handleKeyDown(event) {
@@ -193,7 +180,7 @@ module.exports = React.createClass({
   }
 });
 
-},{"./footer.js":3,"./jquery_lite.js":4,"./scoreModal.js":6,"./tile.js":7,"./utils.js":8,"jquery":10,"react":165}],3:[function(require,module,exports){
+},{"./footer.js":3,"./jquery_lite.js":4,"./scoreModal.js":6,"./tile.js":7,"./utils.js":8,"react":165}],3:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -242,245 +229,237 @@ module.exports = React.createClass({
 },{"react":165}],4:[function(require,module,exports){
 'use strict';
 
-module["export"] = (function () {
-  window.$l = function (arg) {
-    this._docReady = false;
-    var elementList = [];
-    var events = [];
-    if (typeof arg === "string") {
-      elementList = elementList.concat([].slice.call(document.querySelectorAll(arg)));
-    } else if (arg instanceof HTMLElement) {
-      console.log("HTML ELEMENT!");
-      elementList.push(arg);
-    } else if (arg instanceof Function) {
-      if (this._docReady === true) {
-        arg();
+var $l = function $l(arg) {
+  this._docReady = false;
+  var elementList = [];
+  var events = [];
+  if (typeof arg === "string") {
+    elementList = elementList.concat([].slice.call(document.querySelectorAll(arg)));
+  } else if (arg instanceof HTMLElement) {
+    console.log("HTML ELEMENT!");
+    elementList.push(arg);
+  } else if (arg instanceof Function) {
+    if (this._docReady === true) {
+      arg();
+    } else {
+      events.push(arg);
+    }
+    return;
+  }
+
+  document.addEventListener('DOMContentLoaded', (function () {
+    this._docReady = true;
+    events.forEach(function (fn) {
+      fn().bind(this);
+    });
+  }).bind(this));
+
+  return new DomNodeCollection(elementList);
+};
+
+$l.isEmptyObject = function (obj) {
+  function hasKeys(o) {
+    for (var name in o) {
+      if (o.hasOwnProperty(name)) return true;
+    }
+    return false;
+  }
+
+  return !hasKeys(obj);
+};
+
+$l.extend = function () {
+  var objects = [].slice.call(arguments);
+  var merged = {};
+  objects.forEach(function (object) {
+    for (var prop in object) {
+      merged[prop] = object[prop];
+    }
+  });
+
+  return merged;
+};
+
+$l.ajax = function (options) {
+  var defaults = {
+    success: function success() {
+      alert('success');
+    },
+    error: function error() {
+      alert('error');
+    },
+    url: "",
+    method: "GET",
+    data: {},
+    contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
+  };
+  options = $l.extend(defaults, options);
+
+  var params;
+  if (!$l.isEmptyObject(options.data)) {
+    var field,
+        queryString = [];
+    for (field in options.data) {
+      queryString.push(field + "=" + options.data[field] + "&");
+    }
+    params = queryString.join("&");
+    options.url = options.url + "?" + params;
+  }
+
+  var request = new XMLHttpRequest();
+
+  request.onload = function () {
+    if (request.readyState == XMLHttpRequest.DONE) {
+      if (request.status == 200) {
+        options.success(request.response);
       } else {
-        events.push(arg);
+        options.error(request.response);
       }
-      return;
     }
-
-    document.addEventListener('DOMContentLoaded', (function () {
-      this._docReady = true;
-      events.forEach(function (fn) {
-        fn().bind(this);
-      });
-    }).bind(this));
-
-    return new DomNodeCollection(elementList);
   };
 
-  $l.isEmptyObject = function (obj) {
-    function hasKeys(o) {
-      for (var name in o) {
-        if (o.hasOwnProperty(name)) return true;
-      }
-      return false;
-    }
+  request.open(options.method, options.url, true);
+  request.send(params);
+};
 
-    return !hasKeys(obj);
-  };
+var DomNodeCollection = function DomNodeCollection(array) {
+  this.collection = array || [];
+};
 
-  $l.extend = function () {
-    var objects = [].slice.call(arguments);
-    var merged = {};
-    objects.forEach(function (object) {
-      for (var prop in object) {
-        merged[prop] = object[prop];
-      }
+DomNodeCollection.prototype.html = function (string) {
+  if (string) {
+    this.collection.forEach(function (node) {
+      node.innerHTML = string;
     });
+  } else {
+    return this.collection[0].innerHTML;
+  }
+};
 
-    return merged;
-  };
+DomNodeCollection.prototype.empty = function () {
+  this.collection.forEach(function (node) {
+    node.innerHTML = "";
+  });
+};
 
-  $l.ajax = function (options) {
-    var defaults = {
-      success: function success() {
-        alert('success');
-      },
-      error: function error() {
-        alert('error');
-      },
-      url: "",
-      method: "GET",
-      data: {},
-      contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
-    };
-    options = $l.extend(defaults, options);
+DomNodeCollection.prototype.append = function (thing) {
+  if (type instanceof DomNodeCollection) {
+    this.collection.concat(thing.collection);
+  } else if (typeof thing === "string") {
+    this.collection[0].outerHTML += thing;
+  } else {
+    this.collection.push(thing);
+  }
+};
 
-    var params;
-    if (!$l.isEmptyObject(options.data)) {
-      var field,
-          queryString = [];
-      for (field in options.data) {
-        queryString.push(field + "=" + options.data[field] + "&");
-      }
-      params = queryString.join("&");
-      options.url = options.url + "?" + params;
+DomNodeCollection.prototype.attr = function (attrName) {
+  var val;
+  this.collection.forEach(function (node) {
+    if (node.hasAttribute(attrName)) {
+      val = node.getAttribute(attrName);
     }
+  });
 
-    var request = new XMLHttpRequest();
+  return val;
+};
 
-    request.onload = function () {
-      if (request.readyState == XMLHttpRequest.DONE) {
-        if (request.status == 200) {
-          options.success(request.response);
-        } else {
-          options.error(request.response);
-        }
-      }
-    };
-
-    request.open(options.method, options.url, true);
-    request.send(params);
-  };
-
-  var DomNodeCollection = function DomNodeCollection(array) {
-    this.collection = array || [];
-  };
-
-  DomNodeCollection.prototype.html = function (string) {
-    if (string) {
-      this.collection.forEach(function (node) {
-        node.innerHTML = string;
-      });
+DomNodeCollection.prototype.addClass = function (className) {
+  this.collection.forEach(function (node) {
+    node.className = node.className.replace(className, "");
+    if (node.className === "") {
+      node.className += className;
     } else {
-      return this.collection[0].innerHTML;
+      node.className += " " + className;
     }
-  };
+  });
 
-  DomNodeCollection.prototype.empty = function () {
-    this.collection.forEach(function (node) {
-      node.innerHTML = "";
-    });
-  };
+  return this.collection;
+};
 
-  DomNodeCollection.prototype.append = function (thing) {
-    if (type instanceof DomNodeCollection) {
-      this.collection.concat(thing.collection);
-    } else if (typeof thing === "string") {
-      this.collection[0].outerHTML += thing;
+DomNodeCollection.prototype.removeClass = function (className) {
+  this.collection.forEach(function (node) {
+    if (something) {
+      node.className = node.classNamereplace(className + " ", "");
     } else {
-      this.collection.push(thing);
-    }
-  };
-
-  DomNodeCollection.prototype.attr = function (attrName) {
-    var val;
-    this.collection.forEach(function (node) {
-      if (node.hasAttribute(attrName)) {
-        val = node.getAttribute(attrName);
-      }
-    });
-
-    return val;
-  };
-
-  DomNodeCollection.prototype.addClass = function (className) {
-    this.collection.forEach(function (node) {
       node.className = node.className.replace(className, "");
-      if (node.className === "") {
-        node.className += className;
-      } else {
-        node.className += " " + className;
-      }
-    });
-
-    return this.collection;
-  };
-
-  DomNodeCollection.prototype.removeClass = function (className) {
-    this.collection.forEach(function (node) {
-      if (something) {
-        node.className = node.classNamereplace(className + " ", "");
-      } else {
-        node.className = node.className.replace(className, "");
-      }
-    });
-  };
-
-  DomNodeCollection.prototype.children = function () {
-    var childCol = new DomNodeCollection();
-    this.collection.forEach(function (node) {
-      childCol.collection = childCol.collection.concat([].slice.call(node.children));
-    });
-
-    return childCol;
-  };
-
-  DomNodeCollection.prototype.parent = function () {
-    var parentCol = new DomNodeCollection();
-    var seen = {};
-    this.collection.forEach(function (node) {
-      if (!seen[node.parentNode.outerHTML]) {
-        parentCol.collection.push(node.parentNode);
-        seen[node.parentNode.outerHTML] = true;
-      }
-    });
-
-    return parentCol;
-  };
-
-  //Get the descendants of each element in the current set of matched elements,
-  //filtered by a selector, jQuery object, or element.
-  DomNodeCollection.prototype.find = function (selector) {
-    var results = [];
-
-    if (typeof selector === "string") {
-      this.collection.forEach(function (node) {
-        results = results.concat([].slice.call(node.querySelectorAll(selector)));
-      });
-    } else {
-      return;
     }
+  });
+};
 
-    return new DomNodeCollection(results);
-  };
+DomNodeCollection.prototype.children = function () {
+  var childCol = new DomNodeCollection();
+  this.collection.forEach(function (node) {
+    childCol.collection = childCol.collection.concat([].slice.call(node.children));
+  });
 
-  DomNodeCollection.prototype.remove = function () {
+  return childCol;
+};
+
+DomNodeCollection.prototype.parent = function () {
+  var parentCol = new DomNodeCollection();
+  var seen = {};
+  this.collection.forEach(function (node) {
+    if (!seen[node.parentNode.outerHTML]) {
+      parentCol.collection.push(node.parentNode);
+      seen[node.parentNode.outerHTML] = true;
+    }
+  });
+
+  return parentCol;
+};
+
+//Get the descendants of each element in the current set of matched elements,
+//filtered by a selector, jQuery object, or element.
+DomNodeCollection.prototype.find = function (selector) {
+  var results = [];
+
+  if (typeof selector === "string") {
     this.collection.forEach(function (node) {
-      node.remove();
+      results = results.concat([].slice.call(node.querySelectorAll(selector)));
     });
+  } else {
+    return;
+  }
 
-    return this.collection;
-  };
+  return new DomNodeCollection(results);
+};
 
-  DomNodeCollection.prototype.on = function (eventType, selector, data, handler) {
-    var collection = this.collection;
-    if (selector) {
-      collection = this.find(selector).collection;
-    }
+DomNodeCollection.prototype.remove = function () {
+  this.collection.forEach(function (node) {
+    node.remove();
+  });
 
-    collection.forEach(function (node) {
-      node.addEventListener(eventType, handler.bind(null, data));
-    });
+  return this.collection;
+};
 
-    return this;
-  };
+DomNodeCollection.prototype.on = function (eventType, selector, data, handler) {
+  var collection = this.collection;
+  if (selector) {
+    collection = this.find(selector).collection;
+  }
 
-  // fix
-  DomNodeCollection.prototype.off = function (eventType, selector, handler) {
-    var collection = this.collection;
-    if (selector) {
-      collection = this.find(selector).collection;
-    }
+  collection.forEach(function (node) {
+    node.addEventListener(eventType, handler.bind(null, data));
+  });
 
-    collection.forEach(function (node) {
-      node.removeEventListener(eventType, handler);
-    });
+  return this;
+};
 
-    return this;
-  };
-})();
+// fix
+DomNodeCollection.prototype.off = function (eventType, selector, handler) {
+  var collection = this.collection;
+  if (selector) {
+    collection = this.find(selector).collection;
+  }
 
-// var options = {
-// success: function(response) {
-//    document.getElementByClassName('results').innerHTML = response;
-//    },
-// url: "http://www.goodtravels.io/api/users",
-// method: "GET"
-// }
+  collection.forEach(function (node) {
+    node.removeEventListener(eventType, handler);
+  });
+
+  return this;
+};
+
+module.exports = $l;
 
 },{}],5:[function(require,module,exports){
 'use strict';
@@ -662,7 +641,7 @@ var $ = require('jquery');
 var Firebase = require('firebase');
 var firebaseURL = 'word-scramble.firebaseIO.com';
 
-var Utils = {
+window.Utils = {
   WORDNIKURL: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=500000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=4&maxLength=6&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5',
 
   pointValues: {
@@ -738,7 +717,25 @@ var Utils = {
 
       this.leaderboard = items;
     }).bind(this));
+  },
+
+  getRequest: function getRequest(url, callback) {
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+
+    request.onload = function () {
+      if (request.readyState == XMLHttpRequest.DONE) {
+        if (request.status == 200) {
+          callback(request.response);
+        } else {
+          alert('Request failed. Returned status of ' + request.status);
+        }
+      }
+    };
+
+    request.send();
   }
+
 };
 
 Utils.getLeaderboard();

@@ -4,7 +4,7 @@ var $ = require('jquery');
 var Firebase = require('firebase');
 const firebaseURL = 'word-scramble.firebaseIO.com';
 
-var Utils = {
+window.Utils = {
   WORDNIKURL: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=500000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=4&maxLength=6&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5',
 	
  	pointValues: {
@@ -80,7 +80,25 @@ var Utils = {
 
         this.leaderboard = items;
     }.bind(this))
-  }
+  },
+
+  getRequest: function (url, callback) {
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+
+    request.onload = function() {
+      if (request.readyState == XMLHttpRequest.DONE ) {
+        if (request.status == 200) {
+          callback(request.response);
+        } else {
+          alert('Request failed. Returned status of ' + request.status);
+        }
+      }
+    };
+
+    request.send();
+  },
+
 }
 
 Utils.getLeaderboard();
