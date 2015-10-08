@@ -24,7 +24,7 @@ module.exports = React.createClass({
     return {
       availableLetters: [],
       guessedLetters: [],
-      points: 0,
+      points: 1350,
       wordsGuessed: 0
     };
   },
@@ -469,7 +469,30 @@ var React = require('react');
 module.exports = React.createClass({
 	displayName: 'exports',
 
+	getInitialState: function getInitialState() {
+		return { name: this.props.name };
+	},
+
+	handleNameEdit: function handleNameEdit(event) {
+		var name = event.target.value;
+		this.setState({ name: name });
+	},
+
+	handleSubmit: function handleSubmit(event) {
+		event.preventDefault();
+		this.props.firebaseRefToRank.set({
+			name: this.state.name,
+			score: this.props.score,
+			wordsGuessed: this.props.wordsGuessed
+		});
+		this.props.removeRankIndex();
+	},
+
 	render: function render() {
+		var style;
+		if (this.props.hasEditView) {
+			var style = 'editing';
+		}
 		return React.createElement(
 			'tr',
 			null,
@@ -480,8 +503,22 @@ module.exports = React.createClass({
 			),
 			React.createElement(
 				'td',
-				null,
-				this.props.name
+				{ className: style },
+				React.createElement(
+					'div',
+					{ className: 'view' },
+					this.state.name
+				),
+				React.createElement(
+					'form',
+					{ onSubmit: this.handleSubmit },
+					React.createElement('input', {
+						refs: 'editField',
+						className: 'edit',
+						value: this.state.name,
+						onChange: this.handleNameEdit
+					})
+				)
 			),
 			React.createElement(
 				'td',
@@ -521,44 +558,9 @@ module.exports = React.createClass({
     this.getLeaderboard(this.handleScore);
   },
 
-  handleScore: function handleScore() {
-    console.log('handling the score');
-    var rankIndex = this.checkIfHighScore();
-    if (typeof rankIndex === 'number') {
-      this.insertNewScore(rankIndex);
-    }
-  },
-
-  checkIfHighScore: function checkIfHighScore() {
-    var idx = 0;
-    for (var idx = 0; idx < 10; idx++) {
-      if (this.state.leaderboard[idx] === undefined || this.props.points > this.state.leaderboard[idx].score) {
-        return idx;
-      }
-    }
-    return false;
-  },
-
-  insertNewScore: function insertNewScore(rank) {
-    this._firebase.child('leaderboard').child(rank + 1).set({ name: 'Guest',
-      score: this.props.points,
-      wordsGuessed: this.props.wordsGuessed
-    });
-  },
-
-  displayLeaderboard: function displayLeaderboard(entry, idx) {
-    return React.createElement(LeaderboardEntry, {
-      rank: idx + 1,
-      name: entry.name,
-      score: entry.score,
-      wordsGuessed: entry.wordsGuessed });
-  },
-
   getLeaderboard: function getLeaderboard(callback) {
-    console.log('getting leaderboard');
     this._firebase = new Firebase(firebaseURL);
     this._firebase.on('value', (function (data) {
-      console.log('hitting firebase');
       var obj = data.val().leaderboard;
       if (!obj) {
         return;
@@ -578,6 +580,67 @@ module.exports = React.createClass({
         callback();
       }
     }).bind(this));
+  },
+
+  handleScore: function handleScore() {
+    var rankIndex = this.checkIfHighScore();
+    this.setState({ rankIndex: rankIndex });
+    if (typeof this.state.rankIndex === 'number') {
+      this.shiftScoresDown(rankIndex);
+      this.insertNewScore(rankIndex);
+    }
+  },
+
+  checkIfHighScore: function checkIfHighScore() {
+    var idx = 0;
+    for (var idx = 0; idx < 10; idx++) {
+      if (this.state.leaderboard[idx] === undefined || this.props.points >= this.state.leaderboard[idx].score) {
+        return idx;
+      }
+    }
+    return false;
+  },
+
+  insertNewScore: function insertNewScore(rankIndex) {
+    var entry = { name: 'Guest',
+      score: this.props.points,
+      wordsGuessed: this.props.wordsGuessed
+    };
+    this._firebase.child('leaderboard').child(rankIndex + 1).set(entry);
+    this.state.leaderboard[rankIndex] = entry;
+    this.setState({ leaderboard: this.state.leaderboard });
+  },
+
+  shiftScoresDown: function shiftScoresDown(rankIndex) {
+    var idx = Math.min(this.state.leaderboard.length, 9);
+
+    for (; idx > rankIndex; idx--) {
+      var entry = this.state.leaderboard[idx - 1];
+      this._firebase.child('leaderboard').child(idx + 1).set({ name: entry.name,
+        score: entry.score,
+        wordsGuessed: entry.wordsGuessed
+      });
+    }
+    console.log('finish shifting scores down');
+  },
+
+  removeRankIndex: function removeRankIndex() {
+    this.setState({ rankIndex: false });
+  },
+
+  displayLeaderboard: function displayLeaderboard(entry, idx) {
+    var hasEditView = false;
+    if (typeof this.state.rankIndex === 'number' && this.state.rankIndex === idx) {
+      hasEditView = true;
+    }
+    return React.createElement(LeaderboardEntry, {
+      rank: idx + 1,
+      name: entry.name,
+      score: entry.score,
+      wordsGuessed: entry.wordsGuessed,
+      hasEditView: hasEditView,
+      firebaseRefToRank: this._firebase.child('leaderboard').child(idx + 1),
+      removeRankIndex: this.removeRankIndex });
   },
 
   render: function render() {

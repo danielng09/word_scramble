@@ -13,7 +13,7 @@ module.exports = React.createClass({
     return ({
       availableLetters: [],
       guessedLetters: [],
-      points: 0,
+      points: 1350,
       wordsGuessed: 0
     })
   },
