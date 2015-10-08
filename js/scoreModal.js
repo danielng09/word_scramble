@@ -1,6 +1,9 @@
 'use strict';
 
 var React = require('react');
+var Firebase = require('firebase');
+const firebaseURL = 'word-scramble.firebaseIO.com';
+
 var Utils = require('./utils.js');
 var WordScrambleApp = require('./app.js')
 var LeaderboardEntry = require('./leaderboardEntry.js')
@@ -8,12 +11,40 @@ var LeaderboardEntry = require('./leaderboardEntry.js')
 module.exports = React.createClass({
   getInitialState: function () {
     return ({
-      leaderboard: []
+      leaderboard: [], leaderboardLoaded: false
     })
   },
 
   componentWillMount: function () {
-    this.setState({ leaderboard: Utils.leaderboard });
+    this.getLeaderboard(this.handleScore);
+  },
+
+  handleScore: function () {
+    console.log('handling the score');
+    var rankIndex = this.checkIfHighScore();
+    if (typeof rankIndex === 'number') {
+      this.insertNewScore(rankIndex);
+    }
+  },
+
+  checkIfHighScore: function () {
+    var idx = 0;
+    for (var idx = 0; idx < 10; idx ++) {
+      if (this.state.leaderboard[idx] === undefined || 
+          this.props.points > this.state.leaderboard[idx].score) {
+        return idx;
+      }
+    }
+    return false;
+  },
+
+  insertNewScore: function (rank) {
+    this._firebase.child('leaderboard')
+                  .child(rank + 1)
+                  .set({name: 'Guest', 
+                        score: this.props.points, 
+                        wordsGuessed: this.props.wordsGuessed
+                      });
   },
 
   displayLeaderboard: function (entry, idx) {
@@ -24,6 +55,32 @@ module.exports = React.createClass({
       score={entry.score}
       wordsGuessed={entry.wordsGuessed}/>
     )
+  },
+
+  getLeaderboard: function (callback) {
+    console.log('getting leaderboard')
+    this._firebase = new Firebase(firebaseURL)
+    this._firebase.on('value', function(data) {
+      console.log('hitting firebase')
+      var obj = data.val().leaderboard;
+      if (!obj) {
+        return;
+      }
+
+      var items = [];
+      for (var id in obj) {
+        if (obj.hasOwnProperty(id)) {
+          items.push(obj[id])
+        }
+      }
+
+      this.setState({ leaderboard: items });
+
+      if (!this.state.leaderboardLoaded) {
+        this.setState({ leaderboardLoaded: true });
+        callback();
+      }
+    }.bind(this))
   },
 
   render: function () {

@@ -501,6 +501,9 @@ module.exports = React.createClass({
 'use strict';
 
 var React = require('react');
+var Firebase = require('firebase');
+var firebaseURL = 'word-scramble.firebaseIO.com';
+
 var Utils = require('./utils.js');
 var WordScrambleApp = require('./app.js');
 var LeaderboardEntry = require('./leaderboardEntry.js');
@@ -510,12 +513,37 @@ module.exports = React.createClass({
 
   getInitialState: function getInitialState() {
     return {
-      leaderboard: []
+      leaderboard: [], leaderboardLoaded: false
     };
   },
 
   componentWillMount: function componentWillMount() {
-    this.setState({ leaderboard: Utils.leaderboard });
+    this.getLeaderboard(this.handleScore);
+  },
+
+  handleScore: function handleScore() {
+    console.log('handling the score');
+    var rankIndex = this.checkIfHighScore();
+    if (typeof rankIndex === 'number') {
+      this.insertNewScore(rankIndex);
+    }
+  },
+
+  checkIfHighScore: function checkIfHighScore() {
+    var idx = 0;
+    for (var idx = 0; idx < 10; idx++) {
+      if (this.state.leaderboard[idx] === undefined || this.props.points > this.state.leaderboard[idx].score) {
+        return idx;
+      }
+    }
+    return false;
+  },
+
+  insertNewScore: function insertNewScore(rank) {
+    this._firebase.child('leaderboard').child(rank + 1).set({ name: 'Guest',
+      score: this.props.points,
+      wordsGuessed: this.props.wordsGuessed
+    });
   },
 
   displayLeaderboard: function displayLeaderboard(entry, idx) {
@@ -524,6 +552,32 @@ module.exports = React.createClass({
       name: entry.name,
       score: entry.score,
       wordsGuessed: entry.wordsGuessed });
+  },
+
+  getLeaderboard: function getLeaderboard(callback) {
+    console.log('getting leaderboard');
+    this._firebase = new Firebase(firebaseURL);
+    this._firebase.on('value', (function (data) {
+      console.log('hitting firebase');
+      var obj = data.val().leaderboard;
+      if (!obj) {
+        return;
+      }
+
+      var items = [];
+      for (var id in obj) {
+        if (obj.hasOwnProperty(id)) {
+          items.push(obj[id]);
+        }
+      }
+
+      this.setState({ leaderboard: items });
+
+      if (!this.state.leaderboardLoaded) {
+        this.setState({ leaderboardLoaded: true });
+        callback();
+      }
+    }).bind(this));
   },
 
   render: function render() {
@@ -613,7 +667,7 @@ module.exports = React.createClass({
   }
 });
 
-},{"./app.js":2,"./leaderboardEntry.js":5,"./utils.js":8,"react":165}],7:[function(require,module,exports){
+},{"./app.js":2,"./leaderboardEntry.js":5,"./utils.js":8,"firebase":9,"react":165}],7:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -638,8 +692,6 @@ module.exports = React.createClass({
 'use strict';
 
 var $ = require('jquery');
-var Firebase = require('firebase');
-var firebaseURL = 'word-scramble.firebaseIO.com';
 
 window.Utils = {
   WORDNIKURL: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=500000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=4&maxLength=6&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5',
@@ -698,51 +750,12 @@ window.Utils = {
       });
       this.dictionary = dictionary;
     }).bind(this));
-  },
-
-  getLeaderboard: function getLeaderboard() {
-    this.firebase = new Firebase(firebaseURL);
-    this.firebase.on('value', (function (data) {
-      var obj = data.val().leaderboard;
-      if (!obj) {
-        return;
-      }
-
-      var items = [];
-      for (var id in obj) {
-        if (obj.hasOwnProperty(id)) {
-          items.push(obj[id]);
-        }
-      }
-
-      this.leaderboard = items;
-    }).bind(this));
-  },
-
-  getRequest: function getRequest(url, callback) {
-    var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-
-    request.onload = function () {
-      if (request.readyState == XMLHttpRequest.DONE) {
-        if (request.status == 200) {
-          callback(request.response);
-        } else {
-          alert('Request failed. Returned status of ' + request.status);
-        }
-      }
-    };
-
-    request.send();
   }
-
 };
-
-Utils.getLeaderboard();
 
 module.exports = Utils;
 
-},{"firebase":9,"jquery":10}],9:[function(require,module,exports){
+},{"jquery":10}],9:[function(require,module,exports){
 /*! @license Firebase v2.3.0
     License: https://www.firebase.com/terms/terms-of-service.html */
 (function() {var g,aa=this;function n(a){return void 0!==a}function ba(){}function ca(a){a.ub=function(){return a.uf?a.uf:a.uf=new a}}
