@@ -24,7 +24,7 @@ module.exports = React.createClass({
     return {
       availableLetters: [],
       guessedLetters: [],
-      points: 1350,
+      points: 50,
       wordsGuessed: 0
     };
   },
@@ -190,7 +190,7 @@ module.exports = React.createClass({
 
   getInitialState: function getInitialState() {
     return {
-      timeLeft: 2
+      timeLeft: 3
     };
   },
 
