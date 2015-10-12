@@ -1,6 +1,6 @@
 # Word Scramble Game
-
 [Live Link](http://www.danielng.me/word_scramble/)
+<img src="src/images/word_scramble.png" width="100%">
 
 ## Description
 * You try and guess the word that the scrambled letters spell. Try and unscramble as many words as possible until the time runs out.
