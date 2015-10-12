@@ -17,10 +17,6 @@ module.exports = React.createClass({
     this.getLeaderboard(this.handleScore);
   },
 
-  componentDidMount: function () {
-    this.setState({ isFirstRender: false });
-  },
-
   getLeaderboard: function (callback) {
     this._firebase = new Firebase(firebaseURL);
     this._firebase.once('value', function(data) {
@@ -66,7 +62,7 @@ module.exports = React.createClass({
                   score: this.props.points,
                   wordsGuessed: this.props.wordsGuessed
                 };
-    leaderboard = leaderboard.splice(0, index).concat(entry, leaderboard);
+    leaderboard = leaderboard.splice(0, index).concat(entry, leaderboard.splice(0, 9 - index));
     this.setState({ leaderboard: leaderboard });
     console.log('finish shifting scores down');
   },
