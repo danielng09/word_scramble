@@ -31,7 +31,11 @@ module.exports = React.createClass({
 
   render: function () {
     return (
-      <span className='footer'>Time: {this.state.timeLeft}s | Points: {this.props.points}</span>
+      <div className='footer'>
+        <div className='footer-ele'>Time: {this.state.timeLeft}s</div>|
+        <div className='footer-ele'>Points: {this.props.points}</div>|
+        <div className='footer-ele'>Words: {this.props.wordsGuessed}</div>
+      </div>
     )
   },
 })

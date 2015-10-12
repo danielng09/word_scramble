@@ -13,7 +13,7 @@ module.exports = React.createClass({
     return ({
       availableLetters: [],
       guessedLetters: [],
-      points: Math.floor(Math.random() * 1000),
+      points: 0,
       wordsGuessed: 0
     });
   },
@@ -91,12 +91,10 @@ module.exports = React.createClass({
                         guessedLetters: [],
                         wordsGuessed: this.state.wordsGuessed + 1 });
         this.getWordFromWordNikAPI();
-        console.log('correct guess');
       }.bind(this), 500);
     } else {
       var scrambledLetters = this.scrambleWordtoLetters(this.state.word);
       this.setState({ availableLetters: scrambledLetters, guessedLetters: [] });
-      console.log('wrong guess');
     }
   },
 
@@ -146,20 +144,14 @@ module.exports = React.createClass({
     console.log(this.state.word)
     return (
       <div>
-        <div id='end-game'>
-        </div>
+        <div id='end-game' />
         <div className='tiles'>
           {letters.map(this.displayLetter)}
         </div>
-        <br /><br /><br /><br />
-        <p /><p />
-        <br />
-        <section>
           <Footer
             points={this.state.points}
             handleOutOfTime={this.handleOutOfTime}
-          />
-        </section>
+            wordsGuessed={this.state.wordsGuessed}/>
       </div>
     )
   }

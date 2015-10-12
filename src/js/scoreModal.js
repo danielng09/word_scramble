@@ -60,11 +60,9 @@ module.exports = React.createClass({
     var leaderboard = this.state.leaderboard;
     var entry = { name: 'Guest',
                   score: this.props.points,
-                  wordsGuessed: this.props.wordsGuessed
-                };
+                  wordsGuessed: this.props.wordsGuessed };
     leaderboard = leaderboard.splice(0, index).concat(entry, leaderboard.splice(0, 9 - index));
     this.setState({ leaderboard: leaderboard });
-    console.log('finish shifting scores down');
   },
 
   handleSubmitHighScore: function(name, index) {
@@ -89,13 +87,12 @@ module.exports = React.createClass({
   },
 
   render: function () {
-    console.log('rendering leaderboard');
     return (
       <div>
         <div className='overlay'></div>
         <div className='score-modal clearfix'>
           <h2>Game Over!</h2>
-          <p>You guessed <b>{this.props.wordsGuessed} words</b> for <b>{this.props.points} points</b></p>
+          <p>You guessed <b>{this.props.wordsGuessed} words</b> for <b>{this.props.points} points</b>!</p>
           <p>The word was <b>{this.props.word}</b></p>
           <br />
           <a id='play-again' href='/word_scramble'>Play Again!</a>

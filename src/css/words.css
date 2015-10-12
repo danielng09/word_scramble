@@ -10,6 +10,7 @@ body {
 
 .tiles {
   text-align: center;
+  margin-bottom: 50px;
 }
 
 .letter {
@@ -79,12 +80,13 @@ body {
   background: #8FC18F;
 }
 
-.clearfix {
-  overflow: auto;
-}
-
 .footer {
   font-size: 25px;
+}
+
+.footer-ele {
+  margin: 0px 25px;
+  display: inline-block;
 }
 
 .leaderboard {
@@ -93,8 +95,10 @@ body {
 }
 
 .leaderboard caption {
+  color: black;
   font-size: 25px;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .leaderboard td .edit {
@@ -109,4 +113,9 @@ body {
   display: block;
   text-align: center;
   margin: 0 auto;
+}
+
+.timer {
+  width: 50%;
+  margin: 0px auto;
 }
