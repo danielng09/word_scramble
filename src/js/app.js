@@ -14,7 +14,8 @@ module.exports = React.createClass({
       availableLetters: [],
       guessedLetters: [],
       points: 0,
-      wordsGuessed: 0
+      wordsGuessed: 0,
+      isCheckingGuess: false
     });
   },
 
@@ -28,7 +29,8 @@ module.exports = React.createClass({
 
   componentDidUpdate: function () {
     if (this.state.word &&
-        this.state.guessedLetters.length === this.state.word.length) {
+        this.state.guessedLetters.length === this.state.word.length &&
+        this.state.isCheckingGuess === false) {
       this.checkGuess();
     }
   },
@@ -87,12 +89,14 @@ module.exports = React.createClass({
   checkGuess: function () {
     var guess = this.state.guessedLetters.join('');
     if (this.state.word === guess) {
+      document.body.removeEventListener('keydown', this.handleKeyDown.bind(this));
       window.setTimeout(function () {
         var value = Utils.calculateValue(this.state.word) * 5;
+        this.getWordFromWordNikAPI();
         this.setState({ points: this.state.points + value,
                         guessedLetters: [],
-                        wordsGuessed: this.state.wordsGuessed + 1 });
-        this.getWordFromWordNikAPI();
+                        wordsGuessed: this.state.wordsGuessed + 1});
+        document.body.addEventListener('keydown', this.handleKeyDown.bind(this));
       }.bind(this), 500);
     } else {
       this.checkWordInDictionary(guess);
