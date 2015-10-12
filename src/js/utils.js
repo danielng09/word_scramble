@@ -1,10 +1,8 @@
 'use strict';
 
-var $ = require('jquery');
-
 window.Utils = {
   WORDNIKURL: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=500000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=4&maxLength=6&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5',
-	
+
  	pointValues: {
     'e': 10,
     'a': 10,
@@ -37,7 +35,7 @@ window.Utils = {
   hasElementInArray: function (array, ele) {
   	for (var idx = 0; idx < array.length; idx++) {
       	if (array[idx] === ele ) {
-      		return idx;	
+      		return idx;
       	}
     	}
   	return false;
@@ -47,19 +45,19 @@ window.Utils = {
     var total = 0;
     word.split('').forEach(function(char) {
       total += this.pointValues[char];
-    }.bind(this))
+    }.bind(this));
     return total;
   },
 
   getDictionary: function () {
-    $.get('words.txt', function(data) {
-      var dictionary = [];
-      data.split('\n').forEach(function(word) {
-        dictionary[word] = true;
-      });
-      this.dictionary = dictionary;
-    }.bind(this))
+    // $.get('words.txt', function(data) {
+    //   var dictionary = [];
+    //   data.split('\n').forEach(function(word) {
+    //     dictionary[word] = true;
+    //   });
+    //   this.dictionary = dictionary;
+    // }.bind(this))
   },
-}
+};
 
-module.exports = Utils
+module.exports = Utils;

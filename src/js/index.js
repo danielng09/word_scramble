@@ -1,7 +1,9 @@
+'user strict';
+
 var React = require('react')
-var WordScrambleApp = require('./js/app.js')
+var App = require('./app.js')
 
 React.render(
-  <WordScrambleApp />,
+  <App />,
   document.getElementById('root')
 );

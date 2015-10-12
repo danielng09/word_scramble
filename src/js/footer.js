@@ -1,12 +1,12 @@
 'use strict';
 
 var React = require('react');
- 
+
 module.exports = React.createClass({
   getInitialState: function () {
     return ({
-      timeLeft: 3
-    })
+      timeLeft: 1
+    });
   },
 
   startTimer: function () {
@@ -16,8 +16,8 @@ module.exports = React.createClass({
   tick: function () {
     this.setState({ timeLeft: this.state.timeLeft - 1});
     if (this.state.timeLeft <= 0) {
-      clearInterval(this.interval)
-      this.props.handleOutOfTime()
+      clearInterval(this.interval);
+      this.props.handleOutOfTime();
     }
   },
 
@@ -26,7 +26,7 @@ module.exports = React.createClass({
   },
 
   componentWillUnmount: function () {
-    clearInterval(this.interval)
+    clearInterval(this.interval);
   },
 
   render: function () {
