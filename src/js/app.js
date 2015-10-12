@@ -15,7 +15,8 @@ module.exports = React.createClass({
       guessedLetters: [],
       points: 0,
       wordsGuessed: 0,
-      isCheckingGuess: false
+      isCheckingGuess: false,
+      validWords: {}
     });
   },
 
@@ -106,10 +107,13 @@ module.exports = React.createClass({
   },
 
   checkWordInDictionary: function(word) {
-    if (Utils.dictionary[word]) {
+    if (Utils.dictionary[word] && !this.state.validWords[word]) {
       let addPoints = Utils.calculateValue(word);
+      var validWords = this.state.validWords;
+      validWords[word] = true;
       this.setState({ points: this.state.points + addPoints,
-                      wordsGuessed: this.state.wordsGuessed + 1})
+                      wordsGuessed: this.state.wordsGuessed + 1,
+                      validWords: validWords})
     }
   },
 
@@ -128,7 +132,7 @@ module.exports = React.createClass({
       return word[idx];
     });
 
-    return output;
+    return output.join('') === word ? this.scrambleWordtoLetters(word) : output;
   },
 
   handleOutOfTime: function () {
