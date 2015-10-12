@@ -4,7 +4,7 @@ var React = require('react');
 var Firebase = require('firebase');
 var firebaseURL = 'word-scramble.firebaseIO.com';
 
-var LeaderboardEntry = require('./leaderboardEntry.js');
+var LeaderboardEntry = require('./LeaderboardEntry.js');
 
 module.exports = React.createClass({
   getInitialState: function () {

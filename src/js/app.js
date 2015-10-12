@@ -3,9 +3,9 @@
 var React = require('react');
 
 var $l = require('./jquery_lite.js');
-var Tile = require('./tile.js');
-var Footer = require('./footer.js');
-var ScoreModal = require('./scoreModal.js');
+var Tile = require('./Tile.js');
+var Footer = require('./Footer.js');
+var ScoreModal = require('./ScoreModal.js');
 var Utils = require('./utils.js');
 
 module.exports = React.createClass({
