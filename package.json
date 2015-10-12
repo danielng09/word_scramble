@@ -1,0 +1,26 @@
+{
+  "name": "word_scramble",
+  "version": "1.0.0",
+  "description": "browser word scramble game",
+  "main": "index.js",
+  "author": "danielng09",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielng09/word_scramble"
+  },
+  "scripts": {
+    "start": "webpack-dev-server",
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "react": "^0.13.3"
+  },
+  "devDependencies": {
+    "babel-core": "^5.2.6",
+    "babel-loader": "^5.0.0",
+    "webpack": "^1.12.2",
+    "webpack-dev-server": "^1.8.2"
+  }
+}

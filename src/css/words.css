@@ -1,0 +1,121 @@
+body {
+  background-color: #EAD2AC;
+  font-family: 'Lato', sans-serif;
+}
+
+#root {
+  text-align: center;
+  margin-top: 10%;
+}
+
+.tiles {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.letter {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 60px;
+  text-align: center;
+  box-shadow: 0 1.5px 3px #626262;
+  height: 85px;
+  line-height: 85px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  color: #35342D;
+  width: 85px;
+  background: #F5BB00;
+  margin: 0 5px;
+}
+
+.selected {
+  background-color: #EC9F05;
+}
+
+.overlay {
+  position: fixed;
+  background-color: rgba(170,169,176,0.7);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 75;
+}
+
+.score-modal {
+  border-radius: 4px;
+  left: 50%;
+  top: 10%;
+  text-align: center;
+  margin-left: -230px;
+  padding: 20px 0px 20px 0px;
+  width: 460px;
+  background: aliceblue;
+  position: absolute;
+  box-shadow: 0 1.5px 3px #626262;
+  z-index: 100;
+}
+
+#play-again {
+  text-decoration: none;
+  color: #403E35;
+  border: none;
+  background: #5cb85c;
+  padding: 10px 40px;
+  border-radius: 4px;
+  transition: 0.3s all;
+  margin-top: 30px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 18px;
+  box-shadow: 0 1.5px 3px #626262;
+}
+
+#modal-line-break {
+  margin: 35px 0px 20px 0px;
+}
+
+#play-again:hover {
+  background: #8FC18F;
+}
+
+.footer {
+  font-size: 25px;
+}
+
+.footer-ele {
+  margin: 0px 25px;
+  display: inline-block;
+}
+
+.leaderboard {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.leaderboard caption {
+  color: black;
+  font-size: 25px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.leaderboard td .edit {
+  display: none;
+}
+
+.leaderboard td.editing .view {
+  display: none;
+}
+
+.leaderboard td.editing .edit {
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.timer {
+  width: 50%;
+  margin: 0px auto;
+}
