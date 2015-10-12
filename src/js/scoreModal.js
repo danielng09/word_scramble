@@ -47,9 +47,9 @@ module.exports = React.createClass({
   },
 
   checkIfHighScore: function () {
-    let length = this.state.leaderboard.length;
-    for (var idx = 0; idx < length; idx ++) {
-      if (this.props.points >= this.state.leaderboard[idx].score) {
+    for (var idx = 0; idx < 10; idx ++) {
+      if (this.state.leaderboard[idx] === undefined ||
+          this.props.points >= this.state.leaderboard[idx].score) {
         return idx;
       }
     }
@@ -99,9 +99,7 @@ module.exports = React.createClass({
           <p>The word was <b>{this.props.word}</b></p>
           <br />
           <a id='play-again' href='/word_scramble'>Play Again!</a>
-          <br /><br /><br />
-          <hr />
-          <br />
+          <hr id='modal-line-break'/>
           <table className='leaderboard'>
             <caption>Leaderboard</caption>
             <th>Rank</th>

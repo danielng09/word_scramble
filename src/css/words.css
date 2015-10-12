@@ -71,6 +71,10 @@ body {
   box-shadow: 0 1.5px 3px #626262;
 }
 
+#modal-line-break {
+  margin: 35px 0px 20px 0px;
+}
+
 #play-again:hover {
   background: #8FC18F;
 }
