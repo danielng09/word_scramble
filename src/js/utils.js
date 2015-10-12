@@ -1,5 +1,7 @@
 'use strict';
 
+var $l = require('./jquery_lite.js');
+
 window.Utils = {
   WORDNIKURL: 'http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=500000&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=4&maxLength=6&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5',
 
@@ -50,14 +52,18 @@ window.Utils = {
   },
 
   getDictionary: function () {
-    // $.get('words.txt', function(data) {
-    //   var dictionary = [];
-    //   data.split('\n').forEach(function(word) {
-    //     dictionary[word] = true;
-    //   });
-    //   this.dictionary = dictionary;
-    // }.bind(this))
+    var saveDictionary = function(data) {
+      var dictionary = {};
+      data.split('\n').forEach(function(word) {
+        dictionary[word] = true;
+      });
+      this.dictionary = dictionary;
+    }.bind(this)
+
+    $l.ajax({ url: '/words.txt', success: saveDictionary})
   },
 };
+
+Utils.getDictionary();
 
 module.exports = Utils;

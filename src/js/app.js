@@ -46,6 +46,7 @@ module.exports = React.createClass({
     $l.ajax({ url: Utils.WORDNIKURL, success: successCallback });
   },
 
+
   handleKeyDown: function (event) {
     event.preventDefault();
     var asciiValue = event.keyCode;
@@ -84,17 +85,27 @@ module.exports = React.createClass({
   },
 
   checkGuess: function () {
-    if (this.state.word === this.state.guessedLetters.join('')) {
+    var guess = this.state.guessedLetters.join('');
+    if (this.state.word === guess) {
       window.setTimeout(function () {
-        var value = Utils.calculateValue(this.state.word);
+        var value = Utils.calculateValue(this.state.word) * 5;
         this.setState({ points: this.state.points + value,
                         guessedLetters: [],
                         wordsGuessed: this.state.wordsGuessed + 1 });
         this.getWordFromWordNikAPI();
       }.bind(this), 500);
     } else {
+      this.checkWordInDictionary(guess);
       var scrambledLetters = this.scrambleWordtoLetters(this.state.word);
       this.setState({ availableLetters: scrambledLetters, guessedLetters: [] });
+    }
+  },
+
+  checkWordInDictionary: function(word) {
+    if (Utils.dictionary[word]) {
+      let addPoints = Utils.calculateValue(word);
+      this.setState({ points: this.state.points + addPoints,
+                      wordsGuessed: this.state.wordsGuessed + 1})
     }
   },
 
@@ -126,10 +137,7 @@ module.exports = React.createClass({
   },
 
   displayLetter: function(letter, idx) {
-    var selected = false;
-    if (idx < this.state.guessedLetters.length) {
-      selected = true;
-    }
+    var selected = idx < this.state.guessedLetters.length ? true : false;
     return (
       <Tile
         key={idx}
