@@ -1,5 +1,5 @@
 # Word Scramble Game
-[Live Link](http://www.danielng.me/word_scramble/)
+[Live Link](http://danielng09.github.io/word_scramble/)
 <img src="src/images/word_scramble.png" width="100%">
 
 ## Description
