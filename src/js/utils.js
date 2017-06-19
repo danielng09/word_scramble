@@ -60,7 +60,7 @@ var Utils = {
       this.dictionary = dictionary;
     }.bind(this)
 
-    $l.ajax({ url: 'http://www.danielng.me/word_scramble/words.txt', success: saveDictionary})
+    $l.ajax({ url: 'http://www.danielng09.github.io/word_scramble/words.txt', success: saveDictionary})
   },
 };
 
